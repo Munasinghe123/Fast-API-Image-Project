@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import threading
 
-# from routes.survey_routes import router as survey_router
+from routes.survey_routes import router as survey_router
 from publish.publish_engine import run_publish_engine
 from config.db_config import test_db_connection
 
@@ -40,7 +40,7 @@ app.add_middleware(
 )
 
 # Routes
-# app.include_router(survey_router, prefix="/survey")
+app.include_router(survey_router, prefix="/survey")
 
 
 # Health

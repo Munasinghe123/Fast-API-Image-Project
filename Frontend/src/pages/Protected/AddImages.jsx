@@ -25,7 +25,7 @@ function AddImages() {
     const checkExistingPole = async () => {
         const code = normalizeCode(poleCode)
         const res = await axios.get(
-            "http://localhost:8000/survey/check_existing_poles",
+            "http://127.0.0.1:8000/survey/check-existing-poles",
             { params: { poleCode: code } }
         )
         return res.data.exists
@@ -44,7 +44,7 @@ function AddImages() {
         const start = normalizeCode(startPoleCode)
         const end = normalizeCode(endPoleCode)
         const res = await axios.get(
-            "http://localhost:8000/survey/check_existing_lines",
+            "http://127.0.0.1:8000/survey/check-existing-lines",
             { params: { startPole: start, endPole: end } }
         )
         return res.data.exists
@@ -80,7 +80,7 @@ function AddImages() {
             });
 
             const response = await axios.post(
-                "http://localhost:8000/survey/upload_pole_images",
+                "http://127.0.0.1:8000/survey/upload-pole-images",
                 formData,
                 {
                     headers: {
@@ -128,7 +128,7 @@ function AddImages() {
             });
 
             const response = await axios.post(
-                "http://localhost:8000/survey/upload_line_images",
+                "http://127.0.0.1:8000/survey/upload-line-images",
                 formData,
                 {
                     headers: {
