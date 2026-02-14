@@ -1,11 +1,8 @@
-from psycopg2.extensions import connection
+from config.db_config import get_db_connection
 
-def create_import_batch(
-    conn: connection,
-    source_folder: str,
-    imported_by: str,
-    total_images: int
-) -> int:
+
+def create_import_batch(source_folder, imported_by, total_images):
+    conn = get_db_connection()
     cur = conn.cursor()
 
     cur.execute(
@@ -23,16 +20,16 @@ def create_import_batch(
     )
 
     batch_id = cur.fetchone()[0]
+
     conn.commit()
     cur.close()
+    conn.close()
 
     return batch_id
 
-def update_duplicates_skipped(
-    conn: connection,
-    batch_id: int,
-    duplicates_skipped: int
-):
+
+def update_duplicates_skipped(batch_id, duplicates_skipped):
+    conn = get_db_connection()
     cur = conn.cursor()
 
     cur.execute(
@@ -46,3 +43,4 @@ def update_duplicates_skipped(
 
     conn.commit()
     cur.close()
+    conn.close()

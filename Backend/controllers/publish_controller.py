@@ -1,32 +1,32 @@
 from pathlib import Path
-from psycopg2.extensions import connection
-
-from utils.file_publisher import copy_and_rename
+from config.db_config import get_db_connection
+from helpers.file_publisher_helper import copy_and_rename
 from config.folder_config import PUBLISHED_DIR
 
 
-def publish_batch(batch_id: int, conn: connection):
+def publish_batch(batch_id):
+    conn = get_db_connection()
     cur = conn.cursor()
 
-    #  Get batch info 
+    # Get batch info
     cur.execute(
         """
         SELECT source_folder
         FROM import_batches
-        WHERE batch_id = %s
-          AND status = 'IMPORTED'
+        WHERE batch_id = %s AND status = 'IMPORTED'
         """,
         (batch_id,)
     )
-
     batch = cur.fetchone()
     if not batch:
         cur.close()
+        conn.close()
         return
+
 
     published_root = PUBLISHED_DIR
 
-    #  Fetch images in order 
+    # Fetch images in correct order
     cur.execute(
         """
         SELECT
@@ -43,10 +43,9 @@ def publish_batch(batch_id: int, conn: connection):
         """,
         (batch_id,)
     )
-
     images = cur.fetchall()
 
-    #  Publish images 
+    # Publish each image
     for (
         image_id,
         raw_path,
@@ -62,6 +61,7 @@ def publish_batch(batch_id: int, conn: connection):
         if category == "POLE":
             dest_dir = published_root / "Poles" / pole_id
             new_name = f"{pole_id}_{sequence_no:02d}{raw_path.suffix}"
+
         else:  # LINE
             section = f"{start_pole}_{end_pole}"
             dest_dir = published_root / "LineSections" / section
@@ -83,7 +83,7 @@ def publish_batch(batch_id: int, conn: connection):
             (str(published_path), image_id)
         )
 
-    #  Mark batch published 
+    # Mark batch published
     cur.execute(
         """
         UPDATE import_batches
@@ -95,3 +95,4 @@ def publish_batch(batch_id: int, conn: connection):
 
     conn.commit()
     cur.close()
+    conn.close()

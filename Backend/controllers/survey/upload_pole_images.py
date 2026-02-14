@@ -4,7 +4,7 @@ from datetime import date
 import hashlib
 
 from config.db_config import get_db_connection
-from Backend.helpers.folder_creation_helper import get_raw_uploads_root
+from helpers.folder_creation_helper import get_raw_uploads_root
 from controllers.db_image_controller import insert_image_record
 from controllers.db_batch_controller import create_import_batch
 

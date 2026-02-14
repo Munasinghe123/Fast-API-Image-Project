@@ -1,8 +1,8 @@
+from config.db_config import get_db_connection
 import psycopg2
-from psycopg2.extensions import connection
+
 
 def insert_image_record(
-    conn: connection,
     file_hash,
     original_filename,
     raw_path,
@@ -13,7 +13,8 @@ def insert_image_record(
     start_pole=None,
     end_pole=None,
     sequence_no=None
-) -> bool:
+):
+    conn = get_db_connection()
     cur = conn.cursor()
 
     try:
@@ -48,9 +49,7 @@ def insert_image_record(
             )
         )
 
-        inserted = cur.rowcount == 1
         conn.commit()
-        return inserted
 
     except psycopg2.Error:
         conn.rollback()
@@ -58,3 +57,4 @@ def insert_image_record(
 
     finally:
         cur.close()
+        conn.close()

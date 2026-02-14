@@ -8,7 +8,7 @@ from controllers.survey.upload_pole_images import upload_pole_images
 
 router = APIRouter()
 
-router.post("/upload-pole-images")
+@router.post("/upload-pole-images")
 async def upload_pole_images_route(
     poleCode: str = Form(...),
     files: List[UploadFile] = File(...)

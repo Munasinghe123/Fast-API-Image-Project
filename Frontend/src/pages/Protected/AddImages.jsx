@@ -82,11 +82,6 @@ function AddImages() {
             const response = await axios.post(
                 "http://127.0.0.1:8000/survey/upload-pole-images",
                 formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data"
-                    }
-                }
             );
 
             console.log("Upload success:", response.data)
@@ -96,8 +91,8 @@ function AddImages() {
             setPoleCode("");
 
         } catch (err) {
-            if (err.response && err.response.data && err.response.data.message) {
-                alert(err.response.data.message);
+            if (err.response?.data?.detail) {
+                alert(err.response.data.detail);
             } else {
                 alert("Upload failed");
             }

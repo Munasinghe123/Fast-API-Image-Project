@@ -2,7 +2,7 @@ from fastapi import UploadFile, HTTPException
 from typing import List
 from datetime import date
 
-from Backend.helpers.folder_creation_helper import get_raw_uploads_root
+from helpers.folder_creation_helper import get_raw_uploads_root
 from controllers.db_batch_controller import create_import_batch
 from controllers.db_image_controller import insert_image_record
 from helpers.hash_helper import compute_sha256
