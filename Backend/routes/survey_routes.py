@@ -5,6 +5,8 @@ from controllers.survey.check_existing_lines import check_existing_lines
 from controllers.survey.check_existing_poles import check_existing_poles
 from controllers.survey.upload_line_images import upload_line_images
 from controllers.survey.upload_pole_images import upload_pole_images
+from controllers.survey.replace_pole_images import replace_pole_images_controller
+from controllers.survey.replace_line_images import replace_line_images
 
 router = APIRouter()
 
@@ -36,3 +38,23 @@ async def upload_line_images_route(
 ):
     return await upload_line_images(startPoleCode, endPoleCode, files)
 
+@router.post("/replace-pole-images")
+async def replace_pole_images_route(
+    poleCode: str = Form(...),
+    files: List[UploadFile] = File(...)
+):
+    return await replace_pole_images_controller(
+        poleCode=poleCode,
+        files=files
+    )
+@router.post("/replace-line-images")
+async def replace_line_images_route(
+    startPoleCode: str = Form(...),
+    endPoleCode: str = Form(...),
+    files: List[UploadFile] = File(...)
+):
+    return await replace_line_images(
+        startPoleCode=startPoleCode,
+        endPoleCode=endPoleCode,
+        files=files
+    )

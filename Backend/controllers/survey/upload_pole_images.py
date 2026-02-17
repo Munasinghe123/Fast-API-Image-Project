@@ -2,18 +2,19 @@ from fastapi import UploadFile, HTTPException
 from typing import List
 from datetime import date
 import hashlib
+from pathlib import Path
 
-from config.db_config import get_db_connection
 from helpers.folder_creation_helper import get_raw_uploads_root
 from controllers.db_image_controller import insert_image_record
 from controllers.db_batch_controller import create_import_batch
+from helpers.pole_sequence_helper import get_next_pole_sequence
+from config.db_config import get_db_connection
 
 
 async def upload_pole_images(
     poleCode: str,
     files: List[UploadFile]
 ):
-    #  Validation 
     if not poleCode or not files:
         raise HTTPException(
             status_code=400,
@@ -24,32 +25,13 @@ async def upload_pole_images(
 
     raw_root = get_raw_uploads_root()
     pole_dir = raw_root / "Poles" / pole_code
+    pole_dir.mkdir(parents=True, exist_ok=True)
 
-    #  Get last sequence number 
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT COALESCE(MAX(sequence_no), 0)
-        FROM images
-        WHERE category = 'POLE'
-        AND UPPER(pole_id) = %s
-    """, (pole_code,))
-
-    last_sequence = cur.fetchone()[0]
-
-    cur.close()
-    conn.close()
-
-    today = date.today()
-    current_sequence = last_sequence
     duplicates_skipped = 0
-    saved_files = []
     new_files_exist = False
+    temp_files = []
 
-    file_data_list = []
-
-    #  First pass: duplicate detection 
+    # 1️⃣ Duplicate detection ONLY
     for file in files:
         file_bytes = await file.read()
         file_hash = hashlib.sha256(file_bytes).hexdigest()
@@ -69,63 +51,63 @@ async def upload_pole_images(
             continue
 
         new_files_exist = True
-        current_sequence += 1
+        temp_files.append((file_bytes, file_hash, file.filename))
 
-        raw_path = pole_dir / file.filename
-
-        file_data_list.append((
-            file.filename,
-            file_bytes,
-            file_hash,
-            raw_path,
-            current_sequence
-        ))
-
-    #  All duplicates case 
     if not new_files_exist:
         raise HTTPException(
             status_code=400,
             detail="All uploaded images are duplicates. Nothing saved."
         )
 
-    #  Folder + batch creation 
-    pole_dir.mkdir(parents=True, exist_ok=True)
+    # 2️⃣ Allocate GLOBAL sequence numbers
+    sequences = get_next_pole_sequence(
+        pole_code,
+        count=len(temp_files),
+        reset=False
+    )
 
+    # 3️⃣ Create batch
     batch_id = create_import_batch(
         source_folder=str(pole_dir),
         imported_by="system",
-        total_images=len(file_data_list)
+        total_images=len(temp_files)
     )
 
-    #  Insert records + save files 
-    for filename, file_bytes, file_hash, raw_path, sequence_no in file_data_list:
+    today = date.today()
+    saved_files = []
+
+    # 4️⃣ Save files + DB records
+    for (file_bytes, file_hash, original_name), seq in zip(temp_files, sequences):
+
+        ext = Path(original_name).suffix.lower()
+        formatted_seq = f"{seq:02d}"
+        safe_name = f"{pole_code}_{formatted_seq}{ext}"
+        raw_path = pole_dir / safe_name
 
         insert_image_record(
             file_hash=file_hash,
-            original_filename=filename,
+            original_filename=original_name,
             raw_path=str(raw_path),
             category="POLE",
             survey_date=today,
             batch_id=batch_id,
             pole_id=pole_code,
-            sequence_no=sequence_no
+            sequence_no=seq
         )
 
         with open(raw_path, "wb") as f:
             f.write(file_bytes)
 
-        saved_files.append(filename)
+        saved_files.append(safe_name)
 
-    #  Mark batch as imported 
+    # 5️⃣ Mark batch as imported
     conn = get_db_connection()
     cur = conn.cursor()
-
     cur.execute("""
         UPDATE import_batches
         SET status = 'IMPORTED'
         WHERE batch_id = %s
     """, (batch_id,))
-
     conn.commit()
     cur.close()
     conn.close()

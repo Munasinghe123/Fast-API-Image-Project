@@ -141,14 +141,94 @@ function AddImages() {
             setEndPoleCode("");
 
         } catch (err) {
-            if (err.response && err.response.data && err.response.data.message) {
-                alert(err.response.data.message);
+            if (err.response && err.response.data && err.response.data.detail) {
+                alert(err.response.data.detail);
             } else {
                 alert("Upload failed");
             }
         }
     };
 
+
+    const replacePoleImages = async () => {
+        try {
+            if (!poleCode) {
+                alert("Pole code is required");
+                return;
+            }
+
+            if (poleImages.length === 0) {
+                alert("Select at least one image");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("poleCode", normalizeCode(poleCode));
+
+            poleImages.forEach((img) => {
+                formData.append("files", img.file);
+            });
+
+            const response = await axios.post(
+                "http://127.0.0.1:8000/survey/replace-pole-images",
+                formData
+            );
+
+            console.log("Replace success:", response.data);
+            alert("Pole images replaced successfully");
+
+            setPoleImages([]);
+            setPoleCode("");
+
+        } catch (err) {
+            if (err.response?.data?.detail) {
+                alert(err.response.data.detail);
+            } else {
+                alert("Replace failed");
+            }
+        }
+    };
+
+    const replaceLineImages = async () => {
+        try {
+            if (!startPoleCode || !endPoleCode) {
+                alert("Both start and end pole codes are required");
+                return;
+            }
+
+            if (lineImages.length === 0) {
+                alert("Select at least one image");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("startPoleCode", normalizeCode(startPoleCode));
+            formData.append("endPoleCode", normalizeCode(endPoleCode));
+
+            lineImages.forEach((img) => {
+                formData.append("files", img.file);
+            });
+
+            const response = await axios.post(
+                "http://127.0.0.1:8000/survey/replace-line-images",
+                formData
+            );
+
+            console.log("Replace success:", response.data);
+            alert("Line images replaced successfully");
+
+            setLineImages([]);
+            setStartPoleCode("");
+            setEndPoleCode("");
+
+        } catch (err) {
+            if (err.response?.data?.detail) {
+                alert(err.response.data.detail);
+            } else {
+                alert("Replace failed");
+            }
+        }
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 p-6">
@@ -296,7 +376,7 @@ function AddImages() {
                                     <button
                                         onClick={() => {
                                             setShowPoleConfirmModal(false)
-                                            uploadPoleImages(true)
+                                            replacePoleImages()
                                         }}
                                         className="px-4 py-2 bg-purple-700 text-white rounded-md"
                                     >
@@ -342,7 +422,7 @@ function AddImages() {
                                     <button
                                         onClick={() => {
                                             setShowLineConfirmModal(false)
-                                            uploadLineImages(true)
+                                            replaceLineImages()
                                         }}
                                         className="px-4 py-2 bg-purple-700 text-white rounded-md"
                                     >
