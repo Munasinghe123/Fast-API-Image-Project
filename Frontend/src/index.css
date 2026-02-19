@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+.heading-font {
+  font-family: "Poppins", sans-serif;
+}
+
+.body-font {
+  font-family: "Inter", sans-serif;
+}
 body {
   overflow-x: hidden;
 }
