@@ -7,6 +7,7 @@
 .body-font {
   font-family: "Inter", sans-serif;
 }
+
 body {
   overflow-x: hidden;
 }
@@ -59,11 +60,14 @@ body {
     transform: translateY(0px);
     opacity: 0.3;
   }
+
   50% {
     opacity: 1;
   }
+
   100% {
     transform: translateY(-200px);
     opacity: 0;
   }
 }
+

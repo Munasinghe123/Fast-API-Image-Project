@@ -43,11 +43,10 @@ function Header() {
           <button
             className="
               group flex items-center gap-2
-              px-5 py-3 rounded-full
-              bg-purple-700 text-white
+              px-5 py-3 rounded-full border-purple-400 border
+              bg-white text-purple-500
               text-md font-semibold
               transition-all duration-300
-              hover:bg-purple-600
               hover:scale-105 
             "
           >

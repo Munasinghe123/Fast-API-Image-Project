@@ -1,8 +1,5 @@
 import React, { useRef } from 'react'
 import LandingPage from './LandingPage'
-import DroneScene from '../components/Drone'
-import Features from './Features'
-import HowItsDone from './HowItsDone'
 
 
 function Home() {
@@ -10,13 +7,9 @@ function Home() {
 
     return (
         <>
-            <div className='relative'>
-    
-                <LandingPage />
-                <Features ref={howItWorksRef} />
-            </div>
 
-            <HowItsDone/>
+            <LandingPage />
+           
         </>
 
     )
