@@ -1,93 +1,161 @@
-import React from 'react'
-import DroneScene from '../components/Drone';
-import HeroImage from '../Images/hero-bg.avif';
+import React, { useEffect, useRef, useState } from "react"
+import gsap from "gsap"
+import slider1 from '../Images/landingPage-slider/slider1.jpeg';
+import slider2 from '../Images/landingPage-slider/slider2.jpg';
+import slider3 from '../Images/landingPage-slider/slider3.jpg';
+import { Link } from "react-router-dom";
+
 
 function LandingPage() {
+    const intervalRef = useRef(null)
+
+    const [utcTime, setUtcTime] = useState("")
+
+    //time
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const now = new Date()
+
+            const sriLankaTime = now.toLocaleTimeString("en-GB", {
+                timeZone: "Asia/Colombo",
+                hour12: false,
+            })
+
+            setUtcTime(sriLankaTime)
+        }, 1000)
+
+        return () => clearInterval(interval)
+    }, [])
+
+    //image slider
+    useEffect(() => {
+        const slides = gsap.utils.toArray(".slide")
+
+        // Initial state
+        slides.forEach((slide, i) => {
+            gsap.set(slide, {
+                opacity: i === 0 ? 1 : 0,
+                scale: 1
+            })
+        })
+
+        let current = 0
+
+        intervalRef.current = setInterval(() => {
+            const next = (current + 1) % slides.length
+
+            // Fade out current
+            gsap.to(slides[current], {
+                opacity: 0,
+                scale: 1.1,
+                duration: 2,
+                ease: "power2.inOut"
+            })
+
+            // Fade in next
+            gsap.fromTo(
+                slides[next],
+                { opacity: 0, scale: 1 },
+                {
+                    opacity: 1,
+                    scale: 1.05,
+                    duration: 2,
+                    ease: "power2.inOut"
+                }
+            )
+
+            current = next
+        }, 5000)
+
+        return () => clearInterval(intervalRef.current)
+    }, [])
+
     return (
-        <div className='relative w-full min-h-screen'>
-            <div className='relative grid grid-cols-1 lg:grid-cols-2 min-h-screen'>
-                {/* left col */}
-                <div className='flex flex-col justify-center px-5 lg:px-10 '>
+        <section className="relative h-screen overflow-hidden">
 
-                    <div className='flex flex-col justify-center '>
-                        <h1 className="text-4xl lg:text-6xl font-semibold leading-tight text-gray-900 mb-6">
-                            <span className='text-purple-800'>Power Line Inspection</span> <br />
-                            <span> and Analysis </span>
-                        </h1>
+            {/* Background Slides */}
+            <div className="absolute inset-0">
+                <img src={slider1} className="slide absolute inset-0 w-full h-full object-cover" />
+                <img src={slider2} className="slide absolute inset-0 w-full h-full object-cover" />
+                <img src={slider3} className="slide absolute inset-0 w-full h-full object-cover" />
+            </div>
 
-                        <p className="text-lg text-gray-600 max-w-xl mb-10 leading-relaxed">
-                            Transform drone imagery into actionable infrastructure insights.
-                        </p>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
 
-                        <div className="grid grid-cols-2 gap-6 max-w-lg">
+            <div className="relative z-10 h-full flex items-center lg:text-left text-center lg:px-20 ">
+                {/* Hero Content */}
+                <div className="text-white w-full lg:max-w-2xl px-6 lg:px-0">
 
-                            <div className="p-4 rounded-xl bg-gray-50 border border-purple-400 hover:border-purple-600 transition">
-                                <p className="text-xs text-gray-500 uppercase tracking-wide">Image Upload</p>
-                                <p className="font-medium text-gray-800">Drone Image Management</p>
-                            </div>
+                    <h1 className="
+                        text-4xl 
+                        sm:text-5xl 
+                        md:text-6xl 
+                        lg:text-7xl 
+                        font-bold 
+                        leading-[1.1] 
+                        tracking-tight
+                        
+                    ">
+                        Drone <span className="text-purple-500">Image</span> <br className="hidden sm:block" />
+                        Upload Platform
+                    </h1>
 
-                            <div className="p-4 rounded-xl bg-gray-50 border border-purple-400 hover:border-purple-600 transition">
-                                <p className="text-xs text-gray-500 uppercase tracking-wide">Annotation Tools</p>
-                                <p className="font-medium text-gray-800">Manual Defect Marking</p>
-                            </div>
+                    <div className="sm:items-start items-center gap-4 mt-8">
 
-                            <div className="p-4 rounded-xl bg-gray-50 border border-purple-400 hover:border-purple-600 transition">
-                                <p className="text-xs text-gray-500 uppercase tracking-wide">Reporting</p>
-                                <p className="font-medium text-gray-800">Structured PDF Output</p>
-                            </div>
+                        <Link to="/signin">
+                            <button className="
+                                w-fit
+                                px-6 py-3 
+                                bg-amber-400 text-black 
+                                font-semibold 
+                                rounded-lg 
+                                transition-all duration-300 
+                                hover:bg-amber-300 
+                                hover:scale-105 
+                                shadow-lg hover:shadow-amber-400/40
+                            ">
+                                Sign In →
+                            </button>
+                        </Link>
 
-                            <div className="p-4 rounded-xl bg-gray-50 border border-purple-400 hover:border-purple-600 transition">
-                                <p className="text-xs text-gray-500 uppercase tracking-wide">Deployment</p>
-                                <p className="font-medium text-gray-800">Secure Internal Access</p>
-                            </div>
+                    </div>
+                </div>
+                {/* glass card */}
+                <div className="absolute hidden lg:block right-16 bottom-10 
+                        backdrop-blur-xl bg-white/5 
+                        border border-white/10 
+                        rounded-2xl p-6 w-80 text-white shadow-2xl">
 
+                    <p className="text-sm text-gray-400 mb-4 tracking-wide">
+                        System Environment
+                    </p>
+
+                    <div className="space-y-4 text-sm">
+
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-300">Environment</span>
+                            <span className="font-medium text-green-400">Production</span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-300">Time</span>
+                            <span className="font-mono tracking-wide">{utcTime}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-300">Secure Network</span>
+                            <span className="flex items-center gap-2 text-green-400">
+                                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                                Connected
+                            </span>
                         </div>
 
                     </div>
 
                 </div>
-
-                {/* Right side */}
-                <div className='relative flex items-center justify-center w-full h-screen overflow-hidden'>
-                    {/* SVG blob with clipped image */}
-                    <div className='absolute inset-0 flex items-center justify-end'>
-                        <svg
-                            viewBox="0 0 822 980"
-                            className="absolute right-0 top-0 h-full w-full"
-                            preserveAspectRatio="xMaxYMid slice"
-                        >
-                            <defs>
-                                <clipPath id="curveClip">
-                                    <path d="M210.222 0H1089.22V1024H210.222C210.222 1024 683.222 686 210.222 522C-262.778 358 210.222 0 210.222 0Z" />
-                                </clipPath>
-
-
-                            </defs>
-
-                            <image
-                                href={HeroImage}
-                                x="0"
-                                y="25"
-                                width="822"
-                                height="980"
-                                preserveAspectRatio="xMaxYMax slice"
-                                clipPath="url(#curveClip)"
-                            />
-                            <rect
-                                width="100%"
-                                height="100%"
-                                fill="black"
-                                opacity="0.3"
-                                clipPath="url(#curveClip)"
-                            />
-                        </svg>
-                    </div>
-
-                    <DroneScene />
-                    
-                </div>
             </div>
-        </div>
+
+        </section>
     )
 }
 

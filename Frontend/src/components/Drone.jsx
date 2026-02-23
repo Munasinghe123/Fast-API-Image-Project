@@ -35,7 +35,7 @@ export default function DroneScene() {
         <Canvas
           shadows
           camera={{ position: [3, 2, 6], fov: 45 }}  //x y z
-          style={{ width: '100%', height: '100%' }}
+          style={{ width: '100%', height: '100%',pointerEvents: 'none' }}
         >
           <ambientLight intensity={0.7} />
           <directionalLight position={[5, 5, 5]} intensity={1} />
